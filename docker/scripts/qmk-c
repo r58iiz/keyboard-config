@@ -1,0 +1,49 @@
+#!/bin/sh
+set -e
+
+tree="${1:?Usage: qmk-c <qmk|vial> <keyboard-path> [keymap] [-- extra qmk compile args]}"
+shift
+kb="${1:?Usage: qmk-c <qmk|vial> <keyboard-path> [keymap] [-- extra qmk compile args]}"
+shift
+
+case "$tree" in
+qmk) repo_dir="${QMK_TREE:-/keeb/qmk_firmware}" ;;
+vial) repo_dir="${VIAL_TREE:-/keeb/vial-qmk}" ;;
+*)
+	echo "Usage: qmk-c <qmk|vial> <keyboard-path> [keymap] [-- extra qmk compile args]" >&2
+	exit 1
+	;;
+esac
+
+keymap="${1:-default}"
+shift 2>/dev/null || true
+
+if [ ! -d "$repo_dir" ]; then
+	echo "QMK tree not found: $repo_dir" >&2
+	exit 1
+fi
+
+if [ ! -d "$repo_dir/keyboards/$kb/keymaps/$keymap" ]; then
+	echo "Keymap not found: $keymap (for $kb in $repo_dir)" >&2
+	exit 1
+fi
+
+cd "$repo_dir"
+qmk config user.qmk_home="$repo_dir" >/dev/null
+
+out=$(qmk compile -kb "$kb" -km "$keymap" "$@" 2>&1 | tee /dev/stderr)
+uf2=$(printf "%s\n" "$out" | grep "Creating UF2 file" | sed "s/.*: \\(.*\\.uf2\\).*/\\1/")
+
+if [ "$uf2" = "" ]; then
+	echo "UF2 file not found in build output" >&2
+	exit 1
+fi
+
+if [ ! -d "/out" ]; then
+	echo "Directory not found: /out" >&2
+	exit 1
+fi
+
+dest="/out/${tree}-$(basename "$uf2")"
+echo "Copying UF2 file: $uf2 -> $dest"
+cp "$uf2" "$dest"
