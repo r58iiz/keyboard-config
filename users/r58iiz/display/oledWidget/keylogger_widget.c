@@ -10,7 +10,7 @@ char        basic_codes_to_name[57] = {' ', ' ',  ' ', ' ', 'a',  'b', 'c', 'd',
                                        '7', '8',  '9', '0', 'R',  'E', 'B', 'T', '_', '-', '=', '[',
                                        ']', '\\', '#', ';', '\'', '`', ',', '.', '/'};
 
-const char *keycode_string(uint16_t keycode) {
+__attribute__((weak)) const char *keycode_string(uint16_t keycode) {
     char       *keycode_str;
     static char key;
     switch (keycode) {

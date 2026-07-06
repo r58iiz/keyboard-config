@@ -6,7 +6,7 @@
 #include "oledWidget/rgbm_widget.h"
 #include "oledWidget/wpm_widget.h"
 
-void render_slave(void) {
+__attribute__((weak)) void render_slave(void) {
     uint8_t        layer        = get_highest_layer(layer_state | default_layer_state);
     static uint8_t last_layer   = 0xFF;
     bool           force_redraw = false;

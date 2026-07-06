@@ -4,7 +4,7 @@
 #include "layer_widget.h"
 #include "../oled_utils.h"
 
-const char *layer_string(uint32_t layer) {
+__attribute__((weak)) const char *layer_string(uint32_t layer) {
     char *layer_str;
     switch (layer) {
         case 0:

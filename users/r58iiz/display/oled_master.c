@@ -6,7 +6,7 @@
 #include "oledWidget/layer_widget.h"
 #include "oledWidget/system_widget.h"
 
-void render_master(uint16_t current_keycode, uint16_t loop_rate) {
+__attribute__((weak)) void render_master(uint16_t current_keycode, uint16_t loop_rate) {
     uint8_t        layer        = get_highest_layer(layer_state | default_layer_state);
     static uint8_t last_layer   = 0xFF;
     bool           force_redraw = false;

@@ -1,22 +1,16 @@
-ENCODER_MAP_ENABLE = yes
-CONVERT_TO = rp2040_ce
-
-# Vial
-VIA_ENABLE = yes
-VIAL_ENABLE = yes
-VIALRGB_ENABLE = yes
-
 # Personal
 OLED_ENABLE = yes
-CONSOLE_ENABLE = no
-EXTRAKEY_ENABLE = yes
-MOUSEKEY_ENABLE = yes
-RGB_MATRIX_CUSTOM_USER = yes
 
-# COMBO_ENABLE = no
-# TAP_DANCE_ENABLE = no
+# Harden
+CONSOLE_ENABLE = no
+COMMAND_ENABLE = no
+MIDI_ENABLE = no
+# Disabling this probably breaks Via/Vial; Verify!!!
+# RAW_ENABLE = no
+
 # KEY_OVERRIDE_ENABLE = no
 
+SRC += r58iiz.c
 SRC += state/split_state.c
 SRC += display/oled_master.c
 SRC += display/oled_slave.c
