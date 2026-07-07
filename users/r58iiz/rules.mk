@@ -5,8 +5,7 @@ OLED_ENABLE = yes
 CONSOLE_ENABLE = no
 COMMAND_ENABLE = no
 MIDI_ENABLE = no
-# Disabling this probably breaks Via/Vial; Verify!!!
-# RAW_ENABLE = no
+MUSIC_ENABLE = no
 
 # KEY_OVERRIDE_ENABLE = no
 

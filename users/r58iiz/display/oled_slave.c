@@ -6,6 +6,10 @@
 #include "oledWidget/rgbm_widget.h"
 #include "oledWidget/wpm_widget.h"
 
+__attribute__((weak)) void render_slave_keymap(uint8_t layer, bool force_redraw) {
+    render_wpm(0, 0, force_redraw);
+}
+
 __attribute__((weak)) void render_slave(void) {
     uint8_t        layer        = get_highest_layer(layer_state | default_layer_state);
     static uint8_t last_layer   = 0xFF;
@@ -17,13 +21,5 @@ __attribute__((weak)) void render_slave(void) {
         force_redraw = true;
     }
 
-    switch (layer) {
-        case 3:
-            render_hsv_info(0, 0, force_redraw);
-            render_rgbm_info(0, 6, force_redraw);
-            break;
-        default:
-            render_wpm(0, 0, force_redraw);
-            break;
-    }
+    render_slave_keymap(layer, force_redraw);
 }

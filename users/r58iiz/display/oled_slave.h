@@ -6,3 +6,4 @@
 #include "quantum.h"
 
 void render_slave(void);
+void render_slave_keymap(uint8_t layer, bool force_redraw);

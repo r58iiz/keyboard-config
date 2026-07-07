@@ -4,6 +4,10 @@
 
 #include QMK_KEYBOARD_H
 #include "r58iiz.h"
+#include "state/split_state.h"
+#include "display/oledWidget/hsv_widget.h"
+#include "display/oledWidget/rgbm_widget.h"
+#include "display/oledWidget/wpm_widget.h"
 
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -55,4 +59,85 @@ const uint16_t PROGMEM c1[]         = {KC_GRV, KC_TAB, COMBO_END};
 combo_t                key_combos[] = {
     COMBO(c1, KC_ESC),
 };
+#endif
+
+#ifdef RGB_MATRIX_ENABLE
+static bool rgb_enabled = false;
+static uint8_t rgb_mode = 0;
+
+void split_state_oled_change_keymap(bool enabled) {
+    if (!enabled) {
+        rgb_enabled = rgb_matrix_is_enabled();
+        rgb_mode    = rgb_matrix_get_mode();
+        if (!rgb_enabled) {
+            rgb_matrix_enable_noeeprom();
+            rgb_matrix_mode_noeeprom(RGB_MATRIX_CUSTOM_my_blank_effect);
+        }
+    } else {
+        if (!rgb_enabled) {
+            rgb_matrix_mode_noeeprom(rgb_mode);
+            rgb_matrix_disable_noeeprom();
+        }
+    }
+}
+
+bool rgb_matrix_indicators_advanced_keymap(uint8_t led_min, uint8_t led_max) {
+    if (!is_layer_rgb_indicator_enabled())
+        return false;
+
+    static uint8_t  last_layer  = 0;
+    static uint32_t layer_timer = 0;
+    static bool     flashing    = false;
+
+    uint8_t         layer       = get_highest_layer(layer_state | default_layer_state);
+
+    if (layer != last_layer) {
+        uint8_t prev_layer = last_layer;
+        last_layer         = layer;
+
+        if (!is_oled_active()) {
+            layer_timer = timer_read();
+            flashing    = (layer != 2 && layer > prev_layer);
+        }
+    }
+
+    if (!is_oled_active() && layer == 2) {
+        rgb_matrix_set_color(33, RGB_GREEN);
+        return false;
+    }
+
+    if (!is_oled_active() && flashing && timer_elapsed(layer_timer) < 100) {
+        rgb_t rgb = {0, 0, 0};
+        switch (layer) {
+            case 0:
+                rgb = (rgb_t){RGB_CORAL};
+                break;
+            case 1:
+                rgb = (rgb_t){RGB_RED};
+                break;
+            case 3:
+                rgb = (rgb_t){RGB_BLUE};
+                break;
+        }
+        rgb_matrix_set_color(33, rgb.r, rgb.g, rgb.b);
+    } else {
+        flashing = false;
+    }
+
+    return false;
+}
+#endif
+
+#ifdef OLED_ENABLE
+void render_slave_keymap(uint8_t layer, bool force_redraw) {
+    switch (layer) {
+        case 3:
+            render_hsv_info(0, 0, force_redraw);
+            render_rgbm_info(0, 6, force_redraw);
+            break;
+        default:
+            render_wpm(0, 0, force_redraw);
+            break;
+    }
+}
 #endif

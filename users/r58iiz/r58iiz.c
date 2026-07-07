@@ -5,11 +5,15 @@
 #include "state/split_state.h"
 #include "timer.h"
 
+#ifdef RAW_ENABLE
+#include "raw_hid.h"
+#endif
+
 
 // Raw HID stuff
 
 #ifdef RAW_ENABLE
-#ifdef VIAL_ENABLE
+#if defined(VIAL_ENABLE) || defined(VIA_ENABLE)
 void raw_hid_receive_kb(uint8_t *data, uint8_t length) {
 #else
 void raw_hid_receive(uint8_t *data, uint8_t length) {
@@ -61,48 +65,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 // RGB Matrix
 
 __attribute__((weak)) bool rgb_matrix_indicators_advanced_keymap(uint8_t led_min, uint8_t led_max) {
-    if (!current_split_state.layer_rgb_indicator_enabled)
-        return false;
-
-    static uint8_t  last_layer  = 0;
-    static uint32_t layer_timer = 0;
-    static bool     flashing    = false;
-
-    uint8_t         layer       = get_highest_layer(layer_state | default_layer_state);
-
-    if (layer != last_layer) {
-        uint8_t prev_layer = last_layer;
-        last_layer         = layer;
-
-        if (!current_split_state.oled_enabled) {
-            layer_timer = timer_read();
-            flashing    = (layer != 2 && layer > prev_layer);
-        }
-    }
-
-    if (!current_split_state.oled_enabled && layer == 2) {
-        rgb_matrix_set_color(33, RGB_GREEN);
-        return false;
-    }
-
-    if (!current_split_state.oled_enabled && flashing && timer_elapsed(layer_timer) < 100) {
-        rgb_t rgb = {0, 0, 0};
-        switch (layer) {
-            case 0:
-                rgb = (rgb_t){RGB_CORAL};
-                break;
-            case 1:
-                rgb = (rgb_t){RGB_RED};
-                break;
-            case 3:
-                rgb = (rgb_t){RGB_BLUE};
-                break;
-        }
-        rgb_matrix_set_color(33, rgb.r, rgb.g, rgb.b);
-    } else {
-        flashing = false;
-    }
-
     return false;
 }
 

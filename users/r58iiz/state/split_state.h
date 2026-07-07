@@ -10,8 +10,7 @@ typedef struct {
         bool    oled_enabled;
         bool    oled_asleep;
         bool    layer_rgb_indicator_enabled;
-        bool    rgb_enabled;
-        uint8_t rgb_mode;
+        uint8_t keymap_data[4];
 } split_state_t;
 
 extern split_state_t current_split_state;
@@ -25,3 +24,6 @@ void                 toggle_layer_rgb_indicator(void);
 
 void                 split_state_init(void);
 void                 split_state_housekeeping(void);
+void                 split_state_oled_change_keymap(bool enabled);
+void                 split_state_housekeeping_keymap(void);
+void                 split_state_trigger_sync(void);

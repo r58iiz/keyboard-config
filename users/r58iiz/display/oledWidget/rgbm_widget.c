@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "rgbm_widget.h"
-#include "../oled_utils.h"
+
+#ifdef RGB_MATRIX_MODE_NAME_ENABLE
+    #include "../oled_utils.h"
 
 void render_rgbm_info(uint8_t col, uint8_t row, bool force_redraw) {
     if (force_redraw) {
@@ -25,10 +27,11 @@ void render_rgbm_info(uint8_t col, uint8_t row, bool force_redraw) {
         oled_set_cursor(col + 2, row + 2);
         oled_write(buf, false);
 
-#ifndef VIAL_ENABLE
+    #ifndef VIAL_ENABLE
         const char *effect_name = rgb_matrix_get_mode_name(mode);
         oled_set_cursor(col, row + 3);
         oled_write(effect_name, false);
-#endif
+    #endif
     }
 }
+#endif
