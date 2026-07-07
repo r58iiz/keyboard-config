@@ -7,15 +7,14 @@ QMK/Vial etc etc based config for my keyboard(s)
 
 ## Keymaps
 
-- `Mechboards/Sofle Pro/r58iiz`
-    ![mechboards/sofle/pro/keymaps/r58iiz](./assets/mechboards_soflepro_r58iiz.svg)
+- `Mechboards/Sofle Pro/qwerty`
+    ![keyboards/mechboards/sofle/pro/keymaps/qwerty](./assets/mechboards_soflepro_qwerty.svg)
+
+- `Mechboards/Sofle Pro/jurf_miryoku`
+    ![keyboards/mechboards/sofle/pro/keymaps/jurf_miryoku](./assets/mechboards_soflepro_jurfmiryoku.svg)
 
 ## To Do
 
-- [ ] Automate keymap image generation (https://github.com/caksoylar/keymap-drawer)
 - [ ] Automate firmware (uf2) generation:
-    - [ ] QMK
-    - [ ] Vial
-- [ ] Create dockerfile:
     - [ ] QMK
     - [ ] Vial
