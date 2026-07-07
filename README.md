@@ -11,7 +11,8 @@ QMK/Vial etc etc based config for my keyboard(s)
     ![keyboards/mechboards/sofle/pro/keymaps/qwerty](./assets/mechboards_soflepro_qwerty.svg)
 
 - `Mechboards/Sofle Pro/jurf_miryoku`
-    ![keyboards/mechboards/sofle/pro/keymaps/jurf_miryoku](./assets/mechboards_soflepro_jurfmiryoku.svg)
+    ![keyboards/mechboards/sofle/pro/keymaps/jurf_miryoku](./assets/mechboards_soflepro_jurfmiryoku_full.svg)
+    ![keyboards/mechboards/sofle/pro/keymaps/jurf_miryoku](./assets/mechboards_soflepro_jurfmiryoku_onehand.svg)
 
 ## To Do
 
