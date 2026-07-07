@@ -62,10 +62,10 @@ combo_t                key_combos[] = {
 #endif
 
 #ifdef RGB_MATRIX_ENABLE
-static bool rgb_enabled = false;
-static uint8_t rgb_mode = 0;
+static bool    rgb_enabled = false;
+static uint8_t rgb_mode    = 0;
 
-void split_state_oled_change_keymap(bool enabled) {
+void           split_state_oled_change_keymap(bool enabled) {
     if (!enabled) {
         rgb_enabled = rgb_matrix_is_enabled();
         rgb_mode    = rgb_matrix_get_mode();

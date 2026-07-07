@@ -6,18 +6,18 @@
 #include "timer.h"
 
 #ifdef RAW_ENABLE
-#include "raw_hid.h"
+    #include "raw_hid.h"
 #endif
 
 
 // Raw HID stuff
 
 #ifdef RAW_ENABLE
-#if defined(VIAL_ENABLE) || defined(VIA_ENABLE)
+    #if defined(VIAL_ENABLE) || defined(VIA_ENABLE)
 void raw_hid_receive_kb(uint8_t *data, uint8_t length) {
-#else
+    #else
 void raw_hid_receive(uint8_t *data, uint8_t length) {
-#endif
+    #endif
     uint8_t response[length];
     memset(response, 0, length);
 
@@ -27,17 +27,16 @@ void raw_hid_receive(uint8_t *data, uint8_t length) {
             response[1] = 0x01;
             response[2] = get_highest_layer(layer_state);
 
-#ifdef VIAL_ENABLE
+    #ifdef VIAL_ENABLE
             host_raw_hid_send(response, length);
-#else
+    #else
             raw_hid_send(response, length);
-#endif
+    #endif
             return;
         }
     }
 }
 #endif
-
 
 
 // Keypress

@@ -1,3 +1,6 @@
+// Copyright 2026 r58iiz (@r58iiz)
+// SPDX-License-Identifier: GPL-2.0-or-later
+
 #pragma once
 
 #ifdef VIAL_ENABLE
@@ -14,3 +17,4 @@
 #define SPLIT_TRANSACTION_IDS_USER RPC_SPLIT_SYNC
 
 #define SPLIT_LAYER_STATE_ENABLE
+

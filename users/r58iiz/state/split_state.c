@@ -11,10 +11,10 @@ static bool     is_oled_locked_off  = false;
 static uint32_t oled_timer          = 0;
 
 split_state_t   current_split_state = {
-      .oled_enabled                = true,
-      .oled_asleep                 = false,
-      .layer_rgb_indicator_enabled = false,
-      .keymap_data                 = {0},
+    .oled_enabled                = true,
+    .oled_asleep                 = false,
+    .layer_rgb_indicator_enabled = false,
+    .keymap_data                 = {0},
 };
 
 // Functions
@@ -49,12 +49,14 @@ void split_state_sync_handler(uint8_t     in_buflen,
 
 static bool split_needs_sync = false;
 
-void split_state_trigger_sync(void) {
+void        split_state_trigger_sync(void) {
     split_needs_sync = true;
 }
 
-__attribute__((weak)) void split_state_housekeeping_keymap(void) {}
-__attribute__((weak)) void split_state_oled_change_keymap(bool enabled) {}
+__attribute__((weak)) void split_state_housekeeping_keymap(void) {
+}
+__attribute__((weak)) void split_state_oled_change_keymap(bool enabled) {
+}
 
 void split_state_init(void) {
     transaction_register_rpc(RPC_SPLIT_SYNC, split_state_sync_handler);
@@ -71,7 +73,7 @@ void split_state_housekeeping(void) {
     bool            new_enabled  = !is_oled_locked_off;
     bool            new_asleep = new_enabled && (timer_elapsed32(oled_timer) > CUSTOM_OLED_TIMEOUT);
 
-    split_needs_sync = false;
+    split_needs_sync           = false;
 
     if (new_enabled != last_enabled) {
         split_state_oled_change_keymap(new_enabled);

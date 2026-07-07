@@ -23,10 +23,13 @@ enum {
 // Layer name on OLED
 const char *layer_string(uint32_t layer) {
     switch (layer) {
-#define MIRYOKU_X(LAYER) case U_##LAYER: return #LAYER;
+#define MIRYOKU_X(LAYER) \
+    case U_##LAYER:      \
+        return #LAYER;
         MIRYOKU_LAYER_LIST
 #undef MIRYOKU_X
-        default: return "?";
+        default:
+            return "?";
     }
 }
 
@@ -51,10 +54,9 @@ void u_td_fn_boot(tap_dance_state_t *state, void *user_data) {
 MIRYOKU_LAYER_LIST
 #undef MIRYOKU_X
 
-tap_dance_action_t tap_dance_actions[] = {
-    [U_TD_BOOT] = ACTION_TAP_DANCE_FN(u_td_fn_boot),
+tap_dance_action_t tap_dance_actions[] = {[U_TD_BOOT] = ACTION_TAP_DANCE_FN(u_td_fn_boot),
 #define MIRYOKU_X(LAYER) [U_TD_U_##LAYER] = ACTION_TAP_DANCE_FN(u_td_fn_U_##LAYER),
-    MIRYOKU_LAYER_LIST
+                                          MIRYOKU_LAYER_LIST
 #undef MIRYOKU_X
 };
 
@@ -179,7 +181,9 @@ bool process_record_keymap(uint16_t keycode, keyrecord_t *record) {
     if (!handle_encoder_keys(keycode, record)) {
         return false;
     }
-    if ((keycode == LT(0, KC_C) || keycode == LT(0, KC_G) || keycode == LT(0, KC_V) || keycode == LT(0, KC_D) || keycode == LT(0, KC_B)) && !record->tap.count) {
+    if ((keycode == LT(0, KC_C) || keycode == LT(0, KC_G) || keycode == LT(0, KC_V)
+         || keycode == LT(0, KC_D) || keycode == LT(0, KC_B))
+        && !record->tap.count) {
         if (record->event.pressed) {
             register_code(KC_SPACE);
         } else {
@@ -257,7 +261,6 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
     [U_FUN]    = {ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS)},
 };
 #endif
-
 
 
 void split_state_housekeeping_keymap(void) {

@@ -7,8 +7,12 @@ kb="${1:?Usage: qmk-c <qmk|vial> <keyboard-path> [keymap] [-- extra qmk compile 
 shift
 
 case "$tree" in
-qmk) repo_dir="${QMK_TREE:-/keeb/qmk_firmware}" ;;
-vial) repo_dir="${VIAL_TREE:-/keeb/vial-qmk}" ;;
+qmk)
+	repo_dir="${QMK_TREE:-/keeb/qmk_firmware}"
+	;;
+vial)
+	repo_dir="${VIAL_TREE:-/keeb/vial-qmk}"
+	;;
 *)
 	echo "Usage: qmk-c <qmk|vial> <keyboard-path> [keymap] [-- extra qmk compile args]" >&2
 	exit 1

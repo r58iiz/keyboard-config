@@ -1,3 +1,4 @@
+// Copyright 2025 Dasky (@daskygit)
 // Copyright 2026 r58iiz (@r58iiz)
 // SPDX-License-Identifier: GPL-2.0-or-later
 

@@ -1,3 +1,4 @@
+// Copyright 2023-2024 Juraj Fiala (@jurf)
 // Copyright 2026 r58iiz (@r58iiz)
 // SPDX-License-Identifier: GPL-2.0-or-later
 
@@ -7,19 +8,19 @@
 #include "rgb.h"
 
 const rgb_t RGB_LAYERS_PRIMARY[] PROGMEM = {
-    [U_GAME]   = INIT_RGB(RGB_SOLARIZED_BASE03),
-    [U_BUTTON] = INIT_RGB(RGB_SOLARIZED_BASE03),
+    [U_GAME]   = INIT_RGB(RGB_SOLARIZED_BASE03), //
+    [U_BUTTON] = INIT_RGB(RGB_SOLARIZED_BASE03), //
 };
 
 const rgb_t RGB_LAYERS_SECONDARY[] PROGMEM = {
-    [U_GAME]   = INIT_RGB(RGB_SOLARIZED_RED),
-    [U_BUTTON] = INIT_RGB(RGB_SOLARIZED_VIOLET),
-    [U_NAV]    = INIT_RGB(RGB_SOLARIZED_CYAN),
-    [U_MOUSE]  = INIT_RGB(RGB_SOLARIZED_YELLOW),
-    [U_MEDIA]  = INIT_RGB(RGB_SOLARIZED_MAGENTA),
-    [U_NUM]    = INIT_RGB(RGB_SOLARIZED_BLUE),
-    [U_SYM]    = INIT_RGB(RGB_SOLARIZED_GREEN),
-    [U_FUN]    = INIT_RGB(RGB_SOLARIZED_RED),
+    [U_GAME]   = INIT_RGB(RGB_SOLARIZED_RED),     //
+    [U_BUTTON] = INIT_RGB(RGB_SOLARIZED_VIOLET),  //
+    [U_NAV]    = INIT_RGB(RGB_SOLARIZED_CYAN),    //
+    [U_MOUSE]  = INIT_RGB(RGB_SOLARIZED_YELLOW),  //
+    [U_MEDIA]  = INIT_RGB(RGB_SOLARIZED_MAGENTA), //
+    [U_NUM]    = INIT_RGB(RGB_SOLARIZED_BLUE),    //
+    [U_SYM]    = INIT_RGB(RGB_SOLARIZED_GREEN),   //
+    [U_FUN]    = INIT_RGB(RGB_SOLARIZED_RED),     //
 };
 
 rgb_t pgm_read_rgb(const rgb_t *rgb) {
@@ -66,7 +67,11 @@ bool filter_hghl(const uint16_t keycode) {
     return keycode == KC_HGHL;
 }
 
-void set_accents(const uint8_t led_min, const uint8_t led_max, const uint8_t layer, const rgb_t rgb, bool (*is_accented)(const uint16_t keycode)) {
+void set_accents(const uint8_t led_min,
+                 const uint8_t led_max,
+                 const uint8_t layer,
+                 const rgb_t   rgb,
+                 bool (*is_accented)(const uint16_t keycode)) {
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
         for (uint8_t col = 0; col < MATRIX_COLS; col++) {
             const uint8_t index = g_led_config.matrix_co[row][col];
@@ -83,17 +88,17 @@ void set_accents(const uint8_t led_min, const uint8_t led_max, const uint8_t lay
 }
 
 bool rgb_matrix_indicators_advanced_keymap(uint8_t led_min, uint8_t led_max) {
-    const uint8_t layer            = get_highest_layer(default_layer_state | layer_state);
+    const uint8_t layer = get_highest_layer(default_layer_state | layer_state);
 
-    rgb_t primary;
+    rgb_t         primary;
 
-    rgb_t secondary;
+    rgb_t         secondary;
     if (is_base_layer(layer)) {
         HSV hsv   = rgb_matrix_config.hsv;
         primary   = hsv_to_rgb(hsv);
         hsv.s     = rgb_matrix_config.speed;
         hsv.h     = (hsv.h + (0x100 / 4) * (layer - U_BASE)) % 0x100;
-        hsv.v     = 0xFF;
+        hsv.v     = 0xFF >> 1; // Decrease brightness, they're too bright
         secondary = hsv_to_rgb(hsv);
     } else {
         primary   = pgm_read_rgb(&(RGB_LAYERS_PRIMARY[layer < U_BUTTON ? layer : U_BUTTON]));
@@ -138,6 +143,8 @@ bool rgb_matrix_indicators_advanced_keymap(uint8_t led_min, uint8_t led_max) {
 
 void override_led_flags(void) {
     // Reclassify row 4 keys (thumb cluster) as LED_FLAG_MODIFIER
-    g_led_config.flags[0] = g_led_config.flags[9] = g_led_config.flags[10] = g_led_config.flags[19] = g_led_config.flags[20] =
-    g_led_config.flags[34] = g_led_config.flags[43] = g_led_config.flags[44] = g_led_config.flags[53] = g_led_config.flags[54] = LED_FLAG_MODIFIER;
+    g_led_config.flags[0] = g_led_config.flags[9] = g_led_config.flags[10] =
+        g_led_config.flags[19] = g_led_config.flags[20] = g_led_config.flags[34] =
+            g_led_config.flags[43] = g_led_config.flags[44] = g_led_config.flags[53] =
+                g_led_config.flags[54]                      = LED_FLAG_MODIFIER;
 }

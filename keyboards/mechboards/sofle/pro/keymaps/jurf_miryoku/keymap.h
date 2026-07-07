@@ -1,3 +1,4 @@
+// Copyright 2023-2024 Juraj Fiala (@jurf)
 // Copyright 2026 r58iiz (@r58iiz)
 // SPDX-License-Identifier: GPL-2.0-or-later
 
@@ -18,18 +19,18 @@ enum custom_keycodes_keymap {
 };
 
 // Define layers
-#define MIRYOKU_LAYER_LIST  \
-    MIRYOKU_X(GAME)   \
-    MIRYOKU_X(BASE)   \
-    MIRYOKU_X(EXTRA)  \
-    MIRYOKU_X(TAP)    \
-    MIRYOKU_X(1HAND)  \
-    MIRYOKU_X(BUTTON) \
-    MIRYOKU_X(NAV)    \
-    MIRYOKU_X(MOUSE)  \
-    MIRYOKU_X(MEDIA)  \
-    MIRYOKU_X(NUM)    \
-    MIRYOKU_X(SYM)    \
+#define MIRYOKU_LAYER_LIST \
+    MIRYOKU_X(GAME)        \
+    MIRYOKU_X(BASE)        \
+    MIRYOKU_X(EXTRA)       \
+    MIRYOKU_X(TAP)         \
+    MIRYOKU_X(1HAND)       \
+    MIRYOKU_X(BUTTON)      \
+    MIRYOKU_X(NAV)         \
+    MIRYOKU_X(MOUSE)       \
+    MIRYOKU_X(MEDIA)       \
+    MIRYOKU_X(NUM)         \
+    MIRYOKU_X(SYM)         \
     MIRYOKU_X(FUN)
 
 enum miryoku_layers {
@@ -44,5 +45,5 @@ enum miryoku_layers {
 #define U_CUT C(KC_X)
 #define U_UND C(KC_Z)
 
-bool is_base_layer(const uint8_t layer);
+bool        is_base_layer(const uint8_t layer);
 const char *layer_string(uint32_t layer);

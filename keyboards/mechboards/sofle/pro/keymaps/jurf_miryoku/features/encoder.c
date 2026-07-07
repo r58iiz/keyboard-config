@@ -1,3 +1,4 @@
+// Copyright 2023-2024 Juraj Fiala (@jurf)
 // Copyright 2026 r58iiz (@r58iiz)
 // SPDX-License-Identifier: GPL-2.0-or-later
 
@@ -8,7 +9,7 @@
 uint8_t enc0_mode = ENC0_MODE_UNDOREDO;
 uint8_t enc1_mode = ENC1_MODE_SCROLL;
 
-bool handle_encoder_keys(uint16_t keycode, keyrecord_t *record) {
+bool    handle_encoder_keys(uint16_t keycode, keyrecord_t *record) {
     if (!record->event.pressed) {
         return true;
     }

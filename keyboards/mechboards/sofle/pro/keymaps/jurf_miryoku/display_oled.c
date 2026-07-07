@@ -1,3 +1,4 @@
+// Copyright 2023-2024 Juraj Fiala (@jurf)
 // Copyright 2025 Dasky (@daskygit)
 // Copyright 2026 r58iiz (@r58iiz)
 // SPDX-License-Identifier: GPL-2.0-or-later
@@ -72,8 +73,9 @@ void oled_reinit_slave(void) {
 
 static void oled_write_padded_5(const char *str) {
     char buf[6] = "     ";
-    int len = strlen(str);
-    if (len > 5) len = 5;
+    int  len    = strlen(str);
+    if (len > 5)
+        len = 5;
     memcpy(buf, str, len);
     oled_write(buf, false);
 }
@@ -124,12 +126,16 @@ void render_master(uint16_t current_keycode, uint16_t loop_rate) {
 
     // Row 10: Active mods
     oled_set_cursor(0, 10);
-    uint8_t mods = get_mods();
-    char mods_str[6] = ".....";
-    if (mods & MOD_MASK_GUI) mods_str[0] = 'G';
-    if (mods & MOD_MASK_ALT) mods_str[1] = 'A';
-    if (mods & MOD_MASK_CTRL) mods_str[2] = 'C';
-    if (mods & MOD_MASK_SHIFT) mods_str[3] = 'S';
+    uint8_t mods        = get_mods();
+    char    mods_str[6] = ".....";
+    if (mods & MOD_MASK_GUI)
+        mods_str[0] = 'G';
+    if (mods & MOD_MASK_ALT)
+        mods_str[1] = 'A';
+    if (mods & MOD_MASK_CTRL)
+        mods_str[2] = 'C';
+    if (mods & MOD_MASK_SHIFT)
+        mods_str[3] = 'S';
     mods_str[4] = ' ';
     mods_str[5] = '\0';
     oled_write(mods_str, false);
