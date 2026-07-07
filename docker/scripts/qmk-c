@@ -35,8 +35,20 @@ fi
 cd "$repo_dir"
 qmk config user.qmk_home="$repo_dir" >/dev/null
 
-out=$(qmk compile -kb "$kb" -km "$keymap" "$@" 2>&1 | tee /dev/stderr)
-uf2=$(printf "%s\n" "$out" | grep "Creating UF2 file" | sed "s/.*: \\(.*\\.uf2\\).*/\\1/")
+out=$(qmk compile -kb "$kb" -km "$keymap" "$@" 2>&1)
+status=$?
+
+printf '%s\n' "$out" >&2
+
+if [ "$status" -ne 0 ]; then
+	echo "QMK exited with non-zero exit code"
+	exit "$status"
+fi
+
+uf2=$(find .build -maxdepth 1 -name '*.uf2' -printf '%T@ %p\n' |
+	sort -nr |
+	head -n1 |
+	cut -d' ' -f2-)
 
 if [ "$uf2" = "" ]; then
 	echo "UF2 file not found in build output" >&2
