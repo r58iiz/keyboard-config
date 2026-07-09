@@ -35,8 +35,11 @@ fi
 cd "$repo_dir"
 qmk config user.qmk_home="$repo_dir" >/dev/null
 
-out=$(qmk compile -kb "$kb" -km "$keymap" "$@" 2>&1)
-status=$?
+if out=$(qmk compile -kb "$kb" -km "$keymap" "$@" 2>&1); then
+	status=0
+else
+	status=$?
+fi
 
 printf '%s\n' "$out" >&2
 
