@@ -7,7 +7,7 @@ ARG QMK_UPSTREAM_REPO=qmk_firmware
 ARG QMK_UPSTREAM_BRANCH=master
 
 ARG CONFIG_GITHUB_USERNAME=r58iiz
-ARG CONFIG_REPO_NAME=r58iiz-keyboard-config
+ARG CONFIG_REPO_NAME=keyboard-config
 ARG CONFIG_BRANCH=main
 
 FROM debian:trixie-slim
