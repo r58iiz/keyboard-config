@@ -1,0 +1,29 @@
+[
+  {
+    "keyboard": "mechboards/sofle/pro",
+    "keymap": "jurf_miryoku",
+    "type": "qmk",
+    "draw": true,
+    "svg": "assets/qmk-mechboards_sofle_pro-jurf_miryoku-AUTO.svg",
+    "vial_convert": {
+      "target_keymap": "jurf_miryoku_vial",
+      "allowed_headers": [
+        "r58iiz.h"
+      ]
+    }
+  },
+  {
+    "keyboard": "mechboards/sofle/pro",
+    "keymap": "jurf_miryoku_vial",
+    "type": "vial",
+    "draw": true,
+    "svg": "assets/vial-mechboards_sofle_pro-jurf_miryoku-AUTO.svg"
+  },
+  {
+    "keyboard": "mechboards/sofle/pro",
+    "keymap": "qwerty",
+    "type": "vial",
+    "draw": true,
+    "svg": "assets/vial-mechboards_sofle_pro-qwerty-AUTO.svg"
+  }
+]

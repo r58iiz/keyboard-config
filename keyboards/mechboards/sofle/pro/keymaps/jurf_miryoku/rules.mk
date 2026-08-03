@@ -1,0 +1,14 @@
+CONVERT_TO = rp2040_ce
+
+USER_NAME := r58iiz
+
+AUTO_SHIFT_ENABLE = yes
+CAPS_WORD_ENABLE = yes
+ENCODER_MAP_ENABLE = yes
+EXTRAKEY_ENABLE = yes
+MOUSEKEY_ENABLE = yes
+TAP_DANCE_ENABLE = yes
+RAW_ENABLE = no
+
+SRC += features/encoder.c
+SRC += rgb/rgb.c

@@ -1,0 +1,104 @@
+name: QMK & Keymaps CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - docker/**
+      - keyboards/**
+      - overlays/**
+      - users/**
+      - keymaps.json
+      - .github/workflows/qmk.yml
+      - .github/workflows/docker.yml
+
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+  changes:
+    name: Detect changed paths
+    runs-on: ubuntu-latest
+    outputs:
+      docker: ${{ steps.filter.outputs.docker }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+      - id: filter
+        uses: dorny/paths-filter@v4
+        with:
+          filters: |
+            docker:
+              - 'docker/**'
+              - '.github/workflows/docker.yml'
+
+  build-container:
+    name: Build container (if needed)
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
+    uses: ./.github/workflows/docker.yml
+    permissions:
+      contents: read
+      packages: write
+    secrets: inherit
+
+  firmware-keymap:
+    name: Build firmware & render keymaps
+    needs: [changes, build-container]
+    if: |
+      always() &&
+      (needs.build-container.result == 'success' || needs.build-container.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Resolve image tag
+        id: image
+        run: |
+          if [ "${{ needs.changes.outputs.docker }}" = "true" ]; then
+            echo "tag=${{ needs.build-container.outputs.image_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=ghcr.io/${{ github.repository }}/qmk-builder:latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pull container
+        run: docker pull ${{ steps.image.outputs.tag }}
+
+      - name: Build & Render
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/out:/out" \
+            -v "${{ github.workspace }}:/local-qmk" \
+            ${{ steps.image.outputs.tag }} \
+            bash -c 'qmk-sync && build-all-firmware.py && draw-keymaps.py --output /local-qmk/assets/keymaps'
+
+      - name: Publish Firmware Release Assets
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: firmware-${{ github.sha }}
+          name: "Firmware Build ${{ github.run_number }} (${{ github.sha }})"
+          body: "Automated QMK & Vial firmware binaries compiled from main."
+          make_latest: true
+          files: |
+            out/*.uf2
+            keyboards/**/keymaps/**/*.vil
+
+      - name: Prune old firmware releases (keep last 10)
+        run: |
+          gh release list --limit 100 --json tagName,createdAt \
+            | jq -r 'sort_by(.createdAt) | reverse | .[10:] | .[].tagName' \
+            | grep '^firmware-' \
+            | xargs -r -I{} gh release delete {} --yes --cleanup-tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit updated keymap SVGs & converted Vial keymaps
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "ci(assets): auto-update keymap SVGs and Vial conversion"
+          file_pattern: |
+            assets/keymaps/*.svg
+            keyboards/**/keymaps/**/*.vil
+            keyboards/**/keymaps/**/keymap.c

@@ -1,0 +1,67 @@
+#!/bin/sh
+set -e
+
+local_src="${LOCAL_QMK_OVERLAY:-/local-qmk}"
+clone_url="${CONFIG_REPO_URL:?CONFIG_REPO_URL not set}"
+clone_branch="${CONFIG_BRANCH:-main}"
+
+if [ -d "$local_src" ] && [ "$(ls -A "$local_src" 2>/dev/null)" != "" ]; then
+	echo "Using local mount: $local_src"
+	src="$local_src"
+	cleanup() { :; }
+else
+	tmp="$(mktemp -d)"
+	echo "No local mount found at $local_src — cloning $clone_url (${clone_branch})"
+	git clone --depth 1 -b "$clone_branch" "$clone_url" "$tmp" ||
+		{
+			echo "Clone failed" >&2
+			rm -rf "$tmp"
+			exit 1
+		}
+	src="$tmp"
+	cleanup() { rm -rf "$tmp"; }
+fi
+
+sync_layer() {
+	layer_src="$1"
+	target="$2"
+	delete_flag="$3"
+
+	for sub in keyboards users; do
+		if [ -d "$layer_src/$sub" ]; then
+			mkdir -p "$target/$sub"
+			echo "Syncing $layer_src/$sub -> $target/$sub"
+
+			if [ "$delete_flag" = "--delete" ]; then
+				rsync -a --delete "$layer_src/$sub/" "$target/$sub/"
+			else
+				rsync -a "$layer_src/$sub/" "$target/$sub/"
+			fi
+		fi
+	done
+}
+
+sync_tree() {
+	tree_name="$1" # qmk | vial
+	target="$2"
+	[ -d "$target" ] || {
+		echo "Skipping missing tree: $target" >&2
+		return
+	}
+
+	# 1. common layer, with --delete so stale removed files actually go away
+	sync_layer "$src" "$target" "--delete"
+
+	# 2. tree-specific overlay, layered on top (no --delete: it must not
+	#    wipe out common files the overlay simply doesn't repeat)
+	overlay="$src/overlays/$tree_name"
+	if [ -d "$overlay" ]; then
+		sync_layer "$overlay" "$target" ""
+	fi
+}
+
+sync_tree "qmk" "$QMK_TREE"
+sync_tree "vial" "$VIAL_TREE"
+
+cleanup
+echo "Sync complete."
