@@ -11,10 +11,9 @@
 
 // Personal
 #define OLED_TIMEOUT               0
-#define OLED_BRIGHTNESS            60
+#define OLED_BRIGHTNESS            0
 #define CUSTOM_OLED_TIMEOUT        15000
 
 #define SPLIT_TRANSACTION_IDS_USER RPC_SPLIT_SYNC
 
 #define SPLIT_LAYER_STATE_ENABLE
-
