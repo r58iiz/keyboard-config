@@ -2,7 +2,7 @@ name: QMK & Keymaps CI
 
 on:
   push:
-    branches: [ main ]
+    branches: ["**"]
     paths:
       - docker/**
       - keyboards/**
@@ -55,7 +55,7 @@ jobs:
       (needs.build-container.result == 'success' || needs.build-container.result == 'skipped')
     runs-on: ubuntu-latest
     permissions:
-      contents: write # to publish releases and push keymap asset updates
+      contents: read # checkout only; publishing/committing happens in a later job
       packages: read # to pull the builder image from GHCR
     steps:
       - name: Checkout Repository
@@ -91,6 +91,46 @@ jobs:
         env:
           WORKSPACE: ${{ github.workspace }}
           STEPS_IMAGE_OUTPUTS_TAG: ${{ steps.image.outputs.tag }}
+
+      - name: Package generated assets for release job
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          shopt -s globstar nullglob
+          tar -czf generated-assets.tar.gz \
+            --ignore-failed-read \
+            out \
+            assets/keymaps \
+            keyboards/**/keymaps/**/*_vial
+
+      - name: Upload generated assets
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: generated-assets
+          path: generated-assets.tar.gz
+          retention-days: 1
+
+  publish-release:
+    name: Publish release, prune, and commit assets
+    needs: [changes, firmware-keymap]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to publish releases and push keymap asset updates
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download generated assets
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: generated-assets
+
+      - name: Unpack generated assets
+        run: tar -xzf generated-assets.tar.gz
 
       - name: Publish Firmware Release Assets
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
