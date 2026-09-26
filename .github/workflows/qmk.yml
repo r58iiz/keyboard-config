@@ -180,50 +180,12 @@ jobs:
       - name: Unpack generated assets
         run: tar -xzf generated-assets.tar.gz
 
-      - name: DEBUG - full diagnostic dump
+      - name: DEBUG - glob magic sanity check
         run: |
-          set -x
-          echo "########## 1. git status (working tree, no ignored) ##########"
-          git status --porcelain
-
-          echo "########## 2. git status --ignored ##########"
-          git status --porcelain --ignored
-
-          echo "########## 3. Target files: exist? mtime? size? ##########"
-          find keyboards -type f \( -name config.h -o -name keymap.c -o -name keymap.h \) \
-            -path '*_vial*' -exec ls -la {} \;
-
-          echo "########## 4. git check-ignore on each ##########"
-          find keyboards -type f \( -name config.h -o -name keymap.c -o -name keymap.h \) \
-            -path '*_vial*' -print0 | while IFS= read -r -d '' f; do
-              echo "-- $f --"
-              git check-ignore -v "$f" || echo "  not ignored"
-            done
-
-          echo "########## 5. git diff for these files ##########"
-          find keyboards -type f \( -name config.h -o -name keymap.c -o -name keymap.h \) \
-            -path '*_vial*' -print0 | while IFS= read -r -d '' f; do
-              echo "-- $f --"
-              git diff --stat -- "$f"
-              git log -1 --format='  last commit: %H %ci' -- "$f"
-            done
-
-          echo "########## 6. Dry-run git add ##########"
-          git add --dry-run -- 'keyboards/**/keymaps/**/*_vial/config.h' \
-                              'keyboards/**/keymaps/**/*_vial/keymap.c' \
-                              'keyboards/**/keymaps/**/*_vial/keymap.h' 2>&1 || true
-
-          echo "########## 7. File ownership/permissions (docker UID mismatch?) ##########"
-          find keyboards -type f \( -name config.h -o -name keymap.c -o -name keymap.h \) \
-            -path '*_vial*' -exec stat -c '%U:%G %a %n' {} \;
-          echo "current user: $(id)"
-
-          echo "########## 8. .gitattributes check (export-ignore / filter?) ##########"
-          git check-attr -a -- $(find keyboards -type f \( -name config.h -o -name keymap.c -o -name keymap.h \) -path '*_vial*')
-
-          echo "########## 9. Is the repo even dirty vs HEAD for these paths? ##########"
-          git diff --name-status HEAD -- 'keyboards/**/*_vial/config.h' 'keyboards/**/*_vial/keymap.c' 'keyboards/**/*_vial/keymap.h' || true
-        working-directory: ${{ github.workspace }}
+          git add --dry-run -- ':(glob)keyboards/**/keymaps/**/*_vial/config.h' \
+                               ':(glob)keyboards/**/keymaps/**/*_vial/keymap.c' \
+                               ':(glob)keyboards/**/keymaps/**/*_vial/keymap.h' \
+                               ':(glob)keyboards/**/keymaps/**/*_vial/*.vil'
 
       - name: Publish Firmware Release Assets
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
