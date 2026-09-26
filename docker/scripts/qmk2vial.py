@@ -778,14 +778,25 @@ def upsert_layer_count_define(config_text: str, layer_count: int) -> str:
     If the define already exists (any value), it is replaced in place.
     Otherwise the define is inserted just before a trailing #endif (so it
     stays inside an include guard) or appended at the end of the file.
+    Either way, a marker comment is (re)written directly above the define
+    so it's obvious this line is qmk2vial-managed.
     """
+    marker = "// [qmk2vial] DYNAMIC_KEYMAP_LAYER_COUNT for Vial compatibility"
+    new_block = f"{marker}\n#define DYNAMIC_KEYMAP_LAYER_COUNT {layer_count}"
+
+    # Match an existing define, optionally preceded by our own marker
+    # comment from a prior run, so re-running this doesn't pile up
+    # duplicate comments.
     define_re = re.compile(
-        r"^[ \t]*#[ \t]*define[ \t]+DYNAMIC_KEYMAP_LAYER_COUNT\b.*$", re.MULTILINE
+        r"(?:^[ \t]*"
+        + re.escape(marker)
+        + r"[ \t]*\n)?"
+        + r"^[ \t]*#[ \t]*define[ \t]+DYNAMIC_KEYMAP_LAYER_COUNT\b.*$",
+        re.MULTILINE,
     )
-    new_line = f"#define DYNAMIC_KEYMAP_LAYER_COUNT {layer_count}"
 
     if define_re.search(config_text):
-        return define_re.sub(new_line, config_text, count=1)
+        return define_re.sub(new_block, config_text, count=1)
 
     lines = config_text.splitlines()
     insert_at = len(lines)
@@ -793,7 +804,11 @@ def upsert_layer_count_define(config_text: str, layer_count: int) -> str:
         if re.match(r"^\s*#\s*endif\b", lines[i]):
             insert_at = i
             break
-    lines[insert_at:insert_at] = ["", new_line]
+    lines[insert_at:insert_at] = [
+        "",
+        marker,
+        f"#define DYNAMIC_KEYMAP_LAYER_COUNT {layer_count}",
+    ]
     return "\n".join(lines) + "\n"
 
 
