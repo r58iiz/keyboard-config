@@ -211,9 +211,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
         with:
           commit_message: "ci(assets): auto-update keymap SVGs and Vial conversion"
-          file_pattern: |
-            :(glob)assets/keymaps/*.svg \
-            :(glob)keyboards/**/keymaps/**/*_vial/*.vil \
-            :(glob)keyboards/**/keymaps/**/*_vial/config.h \
-            :(glob)keyboards/**/keymaps/**/*_vial/keymap.c \
-            :(glob)keyboards/**/keymaps/**/*_vial/keymap.h
+          file_pattern: ":(glob)assets/keymaps/*.svg :(glob)keyboards/**/keymaps/**/*_vial/*.vil :(glob)keyboards/**/keymaps/**/*_vial/config.h :(glob)keyboards/**/keymaps/**/*_vial/keymap.c :(glob)keyboards/**/keymaps/**/*_vial/keymap.h"
