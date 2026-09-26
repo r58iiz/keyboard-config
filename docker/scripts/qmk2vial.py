@@ -772,6 +772,53 @@ def strip_vial_incompatible(src: str) -> str:
     return src
 
 
+def upsert_layer_count_define(config_text: str, layer_count: int) -> str:
+    """Set DYNAMIC_KEYMAP_LAYER_COUNT to layer_count inside config_text.
+
+    If the define already exists (any value), it is replaced in place.
+    Otherwise the define is inserted just before a trailing #endif (so it
+    stays inside an include guard) or appended at the end of the file.
+    """
+    define_re = re.compile(
+        r"^[ \t]*#[ \t]*define[ \t]+DYNAMIC_KEYMAP_LAYER_COUNT\b.*$", re.MULTILINE
+    )
+    new_line = f"#define DYNAMIC_KEYMAP_LAYER_COUNT {layer_count}"
+
+    if define_re.search(config_text):
+        return define_re.sub(new_line, config_text, count=1)
+
+    lines = config_text.splitlines()
+    insert_at = len(lines)
+    for i in range(len(lines) - 1, -1, -1):
+        if re.match(r"^\s*#\s*endif\b", lines[i]):
+            insert_at = i
+            break
+    lines[insert_at:insert_at] = ["", new_line]
+    return "\n".join(lines) + "\n"
+
+
+_WARNED_MISSING_VIAL_JSON: set[Path] = set()
+
+
+def warn_if_missing_vial_json(target_dir: Path) -> None:
+    """Sanity check: a Vial keymap output dir should already contain a
+    keymap-level vial.json. If it doesn't, this is very likely the wrong
+    directory (e.g. a brand-new folder instead of the real Vial keymap
+    folder), so warn loudly instead of silently writing files into it.
+    """
+    target_dir = target_dir.resolve()
+    if target_dir in _WARNED_MISSING_VIAL_JSON:
+        return
+    if not (target_dir / "vial.json").exists():
+        _WARNED_MISSING_VIAL_JSON.add(target_dir)
+        print(
+            f"warning: {target_dir} has no vial.json — is this really the "
+            "Vial keymap directory? Refusing to guess; writing anyway, but "
+            "please double check the path.",
+            file=sys.stderr,
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Compile and export QMK keymap to Vial JSON format"
@@ -805,6 +852,19 @@ def main() -> int:
         type=Path,
         default=None,
         help="Optional path to output a modified keymap.c with Vial-incompatible elements stripped",
+    )
+    parser.add_argument(
+        "--out-config",
+        type=Path,
+        default=None,
+        help=(
+            "Optional path to a config.h in the Vial keymap dir. "
+            "DYNAMIC_KEYMAP_LAYER_COUNT is set there to match this keymap's "
+            "layer count. If the file already exists, only that define is "
+            "updated (everything else is left alone); if it doesn't exist, "
+            "it is created from the source keymap's config.h (or a bare "
+            "file if the source has none) with the define added."
+        ),
     )
     parser.add_argument("--pretty", action="store_true")
     parser.add_argument(
@@ -904,20 +964,63 @@ def main() -> int:
 
     text = json.dumps(result, indent=2 if args.pretty else None)
     if args.out_vil:
+        warn_if_missing_vial_json(args.out_vil.parent)
         args.out_vil.write_text(text)
         print(f"Converted vil written to: {args.out_vil}", file=sys.stderr)
     else:
         print(text)
 
+    # Update (or create) config.h in the Vial output dir so
+    # DYNAMIC_KEYMAP_LAYER_COUNT matches this keymap's actual layer count.
+    if args.out_config:
+        warn_if_missing_vial_json(args.out_config.parent)
+        layer_count = len(conv.layer_names)
+        if args.out_config.exists():
+            base_config_text = args.out_config.read_text()
+        else:
+            src_config = keymap_dir / "config.h"
+            if src_config.exists():
+                base_config_text = src_config.read_text()
+            else:
+                base_config_text = "#pragma once\n"
+        updated_config = upsert_layer_count_define(base_config_text, layer_count)
+        args.out_config.parent.mkdir(parents=True, exist_ok=True)
+        args.out_config.write_text(updated_config)
+        print(
+            f"DYNAMIC_KEYMAP_LAYER_COUNT set to {layer_count} in: {args.out_config}",
+            file=sys.stderr,
+        )
+
     # Strip and generate modified keymap.c if requested
     if args.out_keymap:
+        warn_if_missing_vial_json(args.out_keymap.parent)
         original_src = keymap_file.read_text()
         cleaned_src = strip_vial_incompatible(original_src)
         args.out_keymap.write_text(cleaned_src)
         print(f"Cleaned keymap written to: {args.out_keymap}", file=sys.stderr)
+
+        # Also copy any sibling header files (keymap.h by default, plus
+        # whatever else was passed via --allowed-headers) from the source
+        # keymap directory into the target Vial keymap directory. Without
+        # this, the target dir's keymap.h can silently go stale relative to
+        # the source keymap.c (e.g. a new layer added to the enum in the
+        # source keymap.h won't exist in the copy sitting next to the
+        # converted keymap.c), requiring an error-prone manual sync.
+        out_dir = args.out_keymap.parent
+        for header_name in allowed_headers:
+            if header_name == "keymap.c":
+                continue
+            src_header = keymap_dir / header_name
+            if not src_header.exists():
+                continue
+            header_src = strip_vial_incompatible(src_header.read_text())
+            dst_header = out_dir / header_name
+            dst_header.write_text(header_src)
+            print(f"Copied header: {src_header} -> {dst_header}", file=sys.stderr)
 
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
