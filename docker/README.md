@@ -23,3 +23,7 @@ qmk-sync
 ```bash
 qmk-c <qmk|vial> <keyboard-path> [keymap] [-- extra qmk compile args]
 ```
+
+## TODO
+
+- [ ] Pin QMK bootstrap script pulled from `install.qmk.fm` in `qmk.Dockerfile`
