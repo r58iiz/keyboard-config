@@ -114,7 +114,10 @@ jobs:
   publish-release:
     name: Publish release, prune, and commit assets
     needs: [changes, firmware-keymap]
-    if: github.ref == 'refs/heads/main'
+    if: |
+      !cancelled() && !failure() &&
+      needs.firmware-keymap.result == 'success' &&
+      github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write # to publish releases and push keymap asset updates
