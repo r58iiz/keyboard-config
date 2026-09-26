@@ -39,6 +39,9 @@ def main():
             out_keymap = os.path.join(
                 local_src, "keyboards", kb, "keymaps", target_km, "keymap.c"
             )
+            out_config = os.path.join(
+                local_src, "keyboards", kb, "keymaps", target_km, "config.h"
+            )
 
             script_dir = os.path.dirname(os.path.abspath(__file__))
             qmk2vial_bin = (
@@ -57,6 +60,8 @@ def main():
                 out_vil,
                 "--out-keymap",
                 out_keymap,
+                "--out-config",
+                out_config
             ]
             if allowed_headers:
                 cmd.extend(["--allowed-headers"] + allowed_headers)
