@@ -212,8 +212,8 @@ jobs:
         with:
           commit_message: "ci(assets): auto-update keymap SVGs and Vial conversion"
           file_pattern: |
-            :(glob)assets/keymaps/*.svg
-            :(glob)keyboards/**/keymaps/**/*_vial/*.vil
-            :(glob)keyboards/**/keymaps/**/*_vial/config.h
-            :(glob)keyboards/**/keymaps/**/*_vial/keymap.c
+            :(glob)assets/keymaps/*.svg \
+            :(glob)keyboards/**/keymaps/**/*_vial/*.vil \
+            :(glob)keyboards/**/keymaps/**/*_vial/config.h \
+            :(glob)keyboards/**/keymaps/**/*_vial/keymap.c \
             :(glob)keyboards/**/keymaps/**/*_vial/keymap.h
