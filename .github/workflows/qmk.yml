@@ -114,7 +114,10 @@ jobs:
   publish-release:
     name: Publish release, prune, and commit assets
     needs: [changes, firmware-keymap]
-    if: github.ref == 'refs/heads/main'
+    if: |
+      !cancelled() && !failure() &&
+      needs.firmware-keymap.result == 'success' &&
+      github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write # to publish releases and push keymap asset updates
@@ -122,7 +125,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Download generated assets
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
@@ -156,9 +159,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
         with:
           commit_message: "ci(assets): auto-update keymap SVGs and Vial conversion"
-          file_pattern: |
-            assets/keymaps/*.svg
-            keyboards/**/keymaps/**/*_vial/*.vil
-            keyboards/**/keymaps/**/*_vial/config.h
-            keyboards/**/keymaps/**/*_vial/keymap.c
-            keyboards/**/keymaps/**/*_vial/keymap.h
+          file_pattern: ":(glob)assets/keymaps/*.svg :(glob)keyboards/**/keymaps/**/*_vial/*.vil :(glob)keyboards/**/keymaps/**/*_vial/config.h :(glob)keyboards/**/keymaps/**/*_vial/keymap.c :(glob)keyboards/**/keymaps/**/*_vial/keymap.h"
